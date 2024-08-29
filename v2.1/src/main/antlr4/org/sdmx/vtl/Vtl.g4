@@ -32,7 +32,8 @@ expr:
 	|expr ('='|'<>') expr
 	|expr AND expr
 	|expr (OR|XOR) expr										 
-    |IF expr THEN expr ELSE expr	
+    |IF expr THEN expr ELSE expr
+    |CASE WHEN expr THEN expr (WHEN expr THEN expr)* ELSE expr
     |exprComplex	
     |exprAtom
     |expr CONCAT expr
@@ -48,7 +49,8 @@ exprComplex:
 	|anFunctionClause #standaloneAnalyticFunction
 	|aggrFunction #simpleaggregateFunctions
 	|timeExpr #timeexpressions
-	|setExpr #setExpressions 
+	|setExpr #setExpressions
+	|randExpr #randExpressions
 	|callFunction #callFunctionExpression
 	|joinExpr #joinExpression
 	;
@@ -58,6 +60,16 @@ timeExpr
  |periodExpr (opComp=('>'|'<'|'<='|'>='|'='|'<>') expr)?
  |timeShiftExpr
  |timeAggExpr
+ |DATEDIFF '(' dateFrom=expr ',' dateTo=expr ')'
+ |DATEADD '(' op=expr ',' shiftNumber=expr ',' periodInd=expr ')'
+ |YEAR_OP '(' expr ')'
+ |MONTH_OP '(' expr ')'
+ |DAYOFMONTH '(' expr ')'
+ |DAYOFYEAR '(' expr ')'
+ |DAYTOYEAR '(' expr ')'
+ |DAYTOMONTH '(' expr ')'
+ |YEARTODAY '(' expr ')'
+ |MONTHTODAY '(' expr ')'
  |CURRENT_DATE
  ; 
 
@@ -530,7 +542,11 @@ setExpr
   | SETDIFF '(' expr ',' expr ')'
   | INTERSECT '(' expr (',' expr)* ')'
   ;
-  
+
+randExpr
+  :
+  RANDOM '(' seed=expr ',' index=expr ')'
+  ;
 
 /* subscript expression*/
 subscriptExpr
